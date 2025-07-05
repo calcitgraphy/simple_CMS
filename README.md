@@ -2,7 +2,7 @@
 A simple content management system that runs in a local area network (LAN)
 
 > [!NOTE]
-> The database file will automatically created after run the program
+> The SQL database file will automatically created after run the program
 
 ## how to use
 Run the `server_manager.py` to open the flask GUI. Or use the `launch.vbs` directly for windows systems
