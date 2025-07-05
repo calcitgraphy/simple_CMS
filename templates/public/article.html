@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="article-container">
+    <article class="p-6">
+        <div class="article-header">
+            <h1 class="article-title">{{ article.title }}</h1>
+            <div class="article-meta">
+                Published in <span class="category-badge">{{ article.category.name }}</span>
+            </div>
+        </div>
+        
+        <div class="article-content mb-5">
+            {{ article.content|safe }}
+        </div>
+        
+        {% if article.get_attachments() %}
+        <div class="attachments-section">
+            <h3 class="text-xl font-semibold mb-4">Attachments</h3>
+            <div class="attachments-grid">
+                {% for file in article.get_attachments() %}
+                    {% set file_ext = file.split('.')[-1].lower() %}
+                    <a href="{{ url_for('uploaded_file', filename='pdfs/' + file) if file_ext == 'pdf' else url_for('uploaded_file', filename='videos/' + file) if file_ext in ['mp4', 'mov'] else url_for('uploaded_file', filename='images/' + file) }}" 
+                       class="attachment-card" target="_blank">
+                        <div class="attachment-preview">
+                            {% if file_ext == 'pdf' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e63946" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <path d="M10 15v-1"></path>
+                                    <path d="M14 15v-3"></path>
+                                    <path d="M8 15h8"></path>
+                                </svg>
+                            {% elif file_ext in ['mp4', 'mov'] %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2a9d8f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                                </svg>
+                            {% else %}
+                                <img src="{{ url_for('uploaded_file', filename='images/' + file) }}" alt="Preview">
+                            {% endif %}
+                        </div>
+                        <div class="attachment-name">{{ file }}</div>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="text-center mt-6">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+                Back to Home
+            </a>
+        </div>
+    </article>
+</div>
+{% endblock %}

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Portal | {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    {% if request.path.startswith('/admin') %}
+    <link href="{{ url_for('static', filename='css/quill.snow.css') }}" rel="stylesheet">
+    {% endif %}
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="{{ url_for('index') }}" class="logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                    Article<span>Portal</span>
+                </a>
+                <button class="hamburger-menu" aria-label="Toggle navigation">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+                
+                <div class="nav-links">
+                    {% if request.path.startswith('/admin') %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">Dashboard</a>
+                    <a href="{{ url_for('create_article') }}" class="nav-link {% if request.endpoint == 'create_article' %}active{% endif %}">Create Article</a>
+                    <a href="{{ url_for('index') }}" class="nav-link">View Site</a>
+                    <button id="theme-toggle" class="nav-link theme-toggle" aria-label="Toggle dark mode">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                        <span class="theme-text">Toggle Theme</span> {# Added text for clarity in sidebar #}
+                    </button>
+                    {% else %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Admin Panel</a>
+                    <button id="theme-toggle" class="nav-link theme-toggle" aria-label="Toggle dark mode">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                        <span class="theme-text">Toggle Theme</span> {# Added text for clarity in sidebar #}
+                    </button>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2025 Article Portal. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+            
+            // Check for saved theme or system preference
+            const currentTheme = localStorage.getItem('theme');
+            if (currentTheme === 'dark' || (!currentTheme && prefersDarkScheme.matches)) {
+                document.body.classList.add('dark-theme');
+            }
+            
+            // Toggle theme on button click
+            if (themeToggle) { // Ensure themeToggle exists before adding listener
+                themeToggle.addEventListener('click', function() {
+                    document.body.classList.toggle('dark-theme');
+                    
+                    // Save user preference
+                    if (document.body.classList.contains('dark-theme')) {
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
+            }
+
+            // Sidebar toggle functionality
+            const hamburgerMenu = document.querySelector('.hamburger-menu');
+            const navLinks = document.querySelector('.nav-links');
+            const body = document.body;
+
+            if (hamburgerMenu && navLinks) {
+                // Create an overlay div if it doesn't already exist
+                let overlay = document.querySelector('.overlay');
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.classList.add('overlay');
+                    document.body.appendChild(overlay);
+                }
+
+                // Toggle sidebar and overlay
+                const toggleSidebar = () => {
+                    navLinks.classList.toggle('active');
+                    hamburgerMenu.classList.toggle('active'); // For hamburger animation
+                    overlay.classList.toggle('active');
+                    body.classList.toggle('no-scroll'); // Prevent scrolling when sidebar is open
+                };
+
+                hamburgerMenu.addEventListener('click', toggleSidebar);
+
+                // Close sidebar when clicking outside (on the overlay)
+                overlay.addEventListener('click', toggleSidebar);
+
+                // Close sidebar when a nav link is clicked (optional, but good UX)
+                // Ensure this only triggers for actual links, not the theme toggle button
+                navLinks.querySelectorAll('.nav-link:not(.theme-toggle)').forEach(link => {
+                    link.addEventListener('click', () => {
+                        // Only close sidebar if it's currently open and on mobile screen size
+                        if (window.innerWidth <= 768 && navLinks.classList.contains('active')) {
+                            toggleSidebar();
+                        }
+                    });
+                });
+
+                // Add a resize listener to handle transitions when changing screen size
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth > 768) {
+                        // If desktop size, ensure sidebar is closed and reset classes
+                        navLinks.classList.remove('active');
+                        hamburgerMenu.classList.remove('active');
+                        overlay.classList.remove('active');
+                        body.classList.remove('no-scroll');
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% if request.path.startswith('/admin') %}
+    <script src="{{ url_for('static', filename='js/quill.js') }}"></script>
+    {% endif %}
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
