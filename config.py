@@ -1,7 +1,7 @@
 import os
 
 class Config:
-    SECRET_KEY = '_zSBpuVzCOSch3AKu1Dw5d2yHf-V1Stf8kZ5aAMEHn8'
+    SECRET_KEY = 'YOUR_SECRET_KEY'
 
     if 'DATABASE_FOLDER' in os.environ:
         db_folder = os.environ['DATABASE_FOLDER']
